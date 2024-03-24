@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJS Expense Tracker App</title>
+    <link rel="stylesheet" href="app.css">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/ngstorage/0.3.6/ngStorage.min.js"></script>
+    <script type="text/javascript" src="dirPagination.js"></script>
+     
+</head>
+
+<body>
+<div ng-app="myList" ng-controller="myCtrl" ng-init="load()" id="mylist" class="col-md-8 col-xs-6">
+    <h3>AngularJS Expenses Tracker</h3>
+    <h5>Sortable by Date & Paginator:4</h5>
+
+    <form class="form-inline">
+        <div class="form-group">
+            <label >Search</label>
+            <input type="text" ng-model="search" class="form-control" placeholder="Search">
+        </div>
+    </form>
+    <div class="table-responsive">
+	    <table class="table table-striped table-hover" id="expenseTable">
+	     <thead>
+	        <tr>
+	            <th>Id</th>
+	            <th>Description</th>
+	            <th >Amount</th>
+	            <th ng-click="sort('date')" style="cursor: pointer;">Date
+	            	<span class="glyphicon sort-icon" ng-show="sortKey=='date'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+	            </th>
+	            <th>Action</th>
+	        </tr>
+	    </thead>
+		  <tr dir-paginate="x in list |orderBy:sortKey:reverse |filter:search |itemsPerPage:4">
+		  	<td>{{$index+1}}</td>
+		    <td>{{ x.desc }}</td>
+		    <td>{{ x.amount }}</td>
+		    <td>{{ x.date }}</td>
+		    <td><button class="btn btn-danger pull-right" ng-click="removeItem($index)">Delete</button></td>
+		  </tr>
+		</table>
+
+		  <dir-pagination-controls
+	       max-size="5"
+	       direction-links="true"
+	       boundary-links="true" >
+	      </dir-pagination-controls>
+    </div>
+ <br>
+
+
+    <label for="addMeDesc">Expense Description</label>
+    <textarea class="form-control" rows="5" class="form-control"  ng-model="addMeDesc"></textarea>
+    <label for="addMeDesc">Expense Amount</label>
+    <input type="text" name="addMeAmount" class="form-control" ng-model="addMeAmount" >  
+    <label for="addMeDesc">Expense Date</label>
+    <input type="text" name="addMeDate" class="form-control date"  ng-model="addMeDate" >  
+    <button class="btn btn-success" ng-click="addItem()">Add</button>
+
+    <p>{{errortext}}</p>
+
+</div>
+
+<script type="text/javascript">
+	
+	    //$('#example').DataTable();
+	    $('.date').datepicker();
+	
+	
+    var app= angular.module("myList",["ngStorage","angularUtils.directives.dirPagination"]);
+
+    app.controller("myCtrl", function($scope,$localStorage, $sessionStorage, $window){
+
+
+ 		$scope.load = function () {
+ 		
+
+        	if ( typeof $window.localStorage.list === 'undefined'){
+
+        		$scope.list =[];
+        	}
+
+			else{
+        	 $scope.list = (JSON.parse($window.localStorage.list)) ? JSON.parse($window.localStorage.list) : [];
+        	}        	 
+        	
+        }
+
+        $scope.sort = function(keyname){
+        	$scope.sortKey = keyname;   //set the sortKey to the param passed
+        	$scope.reverse = !$scope.reverse; //if true make it false and vice versa
+   		 }
+
+        $scope.expense=function  (desc,amount,date) {
+			this.desc = desc;
+			this.amount = amount;
+			this.date = date;
+		}
+
+        $scope.addItem = function () {
+
+        	 $scope.errortext = "";
+
+        	if (!$scope.addMeDesc) {return;}
+
+	       
+	        	$scope.list[$scope.list.length] = new $scope.expense($scope.addMeDesc,$scope.addMeAmount,$scope.addMeDate);
+
+	            localStorage.setItem("list", JSON.stringify($scope.list));
+	            $scope.storedarray= (localStorage.getItem('list')!==null) ? JSON.parse(localStorage.getItem('list')) : [];
+	            //console.log($scope.storedarray);
+
+        }
+
+        
+        $scope.removeItem = function(x){
+            $scope.list.splice(x,1);
+            localStorage.setItem("list", JSON.stringify($scope.list));
+            $scope.storedarray= (localStorage.getItem('list')!==null) ? JSON.parse(localStorage.getItem('list')) : [];
+        }
+
+    });
+</script>
+</body>
+</html>

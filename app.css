@@ -1,0 +1,10 @@
+.ex {cursor:pointer;}
+
+li:nth-child(odd) {
+    color: darkslategrey;
+    background-color: yellow;
+}
+li:nth-child(even) {
+    color: midnightblue;
+    background-color: azure;
+}
